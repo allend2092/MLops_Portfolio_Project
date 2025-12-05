@@ -22,7 +22,7 @@ These logs feed a complete ML-driven **anomaly detection pipeline**, similar to 
 
 ---
 
-## 🖥️Hrdware Platform — *The AI Box*
+## 🖥️rardware Platform — *The AI Box*
 
 This workstation generates realistic operational logs suitable for anomaly detection and MLOps workflows.
 
