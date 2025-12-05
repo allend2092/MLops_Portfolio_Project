@@ -1,0 +1,23 @@
+# Virtual environments
+.venv/
+.MLops1/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Model artifacts / large files (optional)
+*.pth
+*.pt
+*.bin
+
+# Kaggle data folder (optional: ignore if you don't want data in git)
+data/
