@@ -1,4 +1,4 @@
-# 🚀 MLOps Portfolio Project  
+# MLOps Portfolio Project  
 ## Real-World Log Anomaly Detection Using a Multi-GPU Home Lab AI Server
 
 ![AI Server](pictures/AI_computer.jpg)
@@ -22,7 +22,7 @@ These logs feed a complete ML-driven **anomaly detection pipeline**, similar to 
 
 ---
 
-## 🖥️ardware Platform — *The AI Box*
+## 🖥️Hrdware Platform — *The AI Box*
 
 This workstation generates realistic operational logs suitable for anomaly detection and MLOps workflows.
 
