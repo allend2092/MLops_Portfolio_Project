@@ -1,147 +1,122 @@
-MLops Portfolio Project — Real-World Log Anomaly Detection Using a Multi-GPU Home Lab AI Server
+# 🚀 MLOps Portfolio Project  
+## Real-World Log Anomaly Detection Using a Multi-GPU Home Lab AI Server
 
-Overview
+![AI Server](pictures/AI_computer.jpg)
 
-This project is an end-to-end MLOps engineering demonstration built around a realistic production-inspired environment: my multi-GPU home-lab AI server.
-Instead of using toy datasets or synthetic examples, this project pulls real operational logs from an actual machine running:
+---
 
-Local LLM inference (Ollama, Open-WebUI, HuggingFace GGUF models)
+## Overview
 
-Dockerized services
+This project is an end-to-end **MLOps engineering demonstration** built around a realistic production-inspired environment:  
+my **multi-GPU home-lab AI server**.
 
-GPU-accelerated workloads
+Instead of relying on toy datasets, this project collects **real operational logs** from a live machine running:
 
-Linux system daemons
+- Local LLM inference (Ollama, Open-WebUI, HuggingFace GGUF models)  
+- Dockerized services  
+- GPU-accelerated workloads  
+- Linux system daemons  
+- High-power PSU + multi-fan cooling under varying thermal loads  
 
-High-power PSU + multi-fan cooling under varying thermal loads
+These logs feed a complete ML-driven **anomaly detection pipeline**, similar to what real-world Data/AI/Platform teams use to monitor production AI services.
 
-These logs are used to design, build, deploy, and monitor a complete ML-driven anomaly detection system, similar to what real-world Data/AI/Platform teams use to ensure reliability in production.
+---
 
-The goal is not just to train a model — it’s to build the full ML lifecycle pipeline:
+## 🖥️ardware Platform — *The AI Box*
 
-data ingestion
+This workstation generates realistic operational logs suitable for anomaly detection and MLOps workflows.
 
-log parsing + validation
+| Component | Details |
+|----------|---------|
+| **CPU** | Intel Core i7-6950X (10 cores / 20 threads) |
+| **Motherboard** | Gigabyte X99P-SLI-CF |
+| **Memory** | 32 GB DDR4 |
+| **GPUs** | NVIDIA RTX 3090 (24 GB VRAM) + NVIDIA RTX 3060 (12 GB VRAM) |
+| **Total VRAM** | 36 GB |
+| **Power Supply** | Cooler Master 1000W |
+| **Cooling** | Dual Thermaltake tower coolers + case fans |
+| **Workload** | Local LLM inference, Docker services, GPU-heavy operations |
 
-feature engineering
+---
 
-model training
+## Project Goal
 
-orchestration
+Design and deploy a **production-style anomaly detection system** capable of identifying:
 
-deployment
+- abnormal GPU behavior  
+- service failures  
+- thermal anomalies  
+- container restarts  
+- unusual system log sequences  
 
-model registry & versioning
+The focus is on building a real MLOps pipeline — not just training a model.
 
-monitoring + drift detection
+---
 
-reproducibility & automation (CI/CD)
+## 🏗️ Project Phases
 
-This project evolves from simple baseline components into a fully modular MLOps stack.
+### **Phase 1 — Log Collection + Exploration**
+- Collect logs from systemd, Docker, GPU telemetry, and AI workloads  
+- Parse and structure messages  
+- Establish a baseline of normal behavior  
 
+### **Phase 2 — Baseline ML Anomaly Detection**
+- Use Isolation Forest, One-Class SVM, or statistical baselines  
+- Detect deviations in log patterns  
+- Build a simple inference script  
 
+### **Phase 3 — Modular Training Pipeline**
+Introduce `/src` modules for:
+- ingestion  
+- preprocessing  
+- feature engineering  
+- model training  
+- batch/online inference  
 
-Hardware Platform — “The AI Box”
+### **Phase 4 — Experiment Tracking & Model Registry**
+Add MLflow or Weights & Biases for:
+- experiment tracking  
+- parameter logging  
+- artifact storage  
+- model versioning  
 
-This project runs on my personal multi-GPU AI workstation, which generates the operational logs used for anomaly detection. The hardware platform is intentionally powerful and dynamic, creating natural opportunities for:
+### **Phase 5 — Deployment**
+Deploy the model as:
+- a FastAPI inference service  
+- containerized via Docker  
+- optional scaling using Docker Compose or Kubernetes  
 
-GPU load spikes
+### **Phase 6 — Monitoring & Drift Detection**
+Use EvidentlyAI or custom dashboards to monitor:
+- data drift  
+- anomaly rate changes  
+- model performance decay  
 
-service failures
+### **Phase 7 — CI/CD for ML**
+Add GitHub Actions to automate:
+- testing  
+- linting  
+- container builds  
+- model retraining  
+- deployments  
 
-thermal throttling
+---
 
-system restarts
+## Why This Project Matters
 
-container crashes
+Most ML portfolios show **notebooks**.  
+Most DevOps portfolios show **infrastructure**.
 
-resource contention
+This project demonstrates the **intersection — MLOps**:
 
-All excellent sources of real anomalies.
+- real data  
+- real pipelines  
+- reproducible experiments  
+- deployment workflows  
+- monitoring and observability  
+- hardware + GPU awareness  
+- automation  
+- model lifecycle management  
 
-System Specifications
-Component	Details
-CPU	Intel Core i7-6950X (10 cores / 20 threads, Broadwell-E)
-Motherboard	Gigabyte X99P-SLI-CF
-Memory	32 GB DDR4
-GPUs	NVIDIA RTX 3090 (24 GB VRAM) + NVIDIA RTX 3060 (12 GB VRAM)
-Total VRAM	36 GB
-Power Supply	Cooler Master 1000W PSU
-OS	Linux (with Docker, Python venvs, systemd logs, GPU drivers)
-Workload	Local LLM inference, Docker containers, heavy GPU utilization
+It showcases skills that map directly onto modern ML Platform, MLOps, and AI engineering roles.
 
-This machine produces the kind of logs you’d expect in a small-scale production inference cluster — making it an ideal environment for an MLOps anomaly-detection portfolio project.
-
-
-
-
-Project Goal
-
-To build a production-grade ML anomaly detection pipeline capable of identifying unusual system behaviors, error spikes, and operational irregularities from complex logs generated by a real AI workload.
-
-The system will evolve across phases:
-
-
-Phase 1 — Log Collection + Exploration (MVP)
-
-Collect logs from systemd, Docker, GPU telemetry, and AI services
-
-Parse and structure logs
-
-Establish baseline behavior patterns
-
-
-Phase 2 — Baseline Anomaly Detection
-
-Build a simple ML model (Isolation Forest / One-Class SVM)
-
-Detect deviations in log frequency, severity, message content, etc.
-
-
-Phase 3 — Modular Training Pipeline
-
-/src modules for ingestion, validation, preprocessing, feature generation, training, and inference
-
-Config-driven architecture
-
-
-Phase 4 — Experiment Tracking + Model Registry
-
-MLflow or Weights & Biases integration
-
-Model versioning and promotion
-
-
-Phase 5 — Deployment
-
-Deploy model as a FastAPI service
-
-Dockerize the serving component
-
-Optionally serve via Kubernetes or a scaled Docker setup
-
-
-Phase 6 — Monitoring + Drift Detection
-
-EvidentlyAI dashboards for:
-
-input data drift
-
-anomaly rate drift
-
-operational metrics
-
-
-Phase 7 — CI/CD for ML
-
-GitHub Actions workflow for:
-
-linting
-
-testing
-
-automated retraining
-
-container builds
-
-deployment
