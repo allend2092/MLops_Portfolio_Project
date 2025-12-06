@@ -3,6 +3,9 @@ import logging
 import os
 
 from src.ingestion.systemd_collector import collect_systemd_logs, save_logs
+from src.ingestion.docker_collector import collect_docker_logs, save_docker_logs
+from src.ingestion.gpu_collector import collect_gpu_metrics, save_gpu_metrics
+
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +47,30 @@ def main() -> None:
         else:
             logger.warning("No logs collected; nothing to save.")
 
-        # TODO: later:
-        # - collect_docker_logs(...)
-        # - collect_gpu_metrics(...)
+        # 2. Docker container logs (last 60 minutes by default)
+        docker_logs = collect_docker_logs(
+            host=CONFIG["ai_host"],
+            user=CONFIG["ai_user"],
+            ssh_key_path=CONFIG["ssh_key"],
+            since_minutes=60,
+            containers=["open-webui", "ollama"],
+        )
+        if docker_logs:
+            save_docker_logs(docker_logs)
+        else:
+            logger.warning("No Docker logs collected; nothing to save.")
+
+
+        # 3. GPU metrics snapshot
+        gpu_metrics = collect_gpu_metrics(
+            host=CONFIG["ai_host"],
+            user=CONFIG["ai_user"],
+            ssh_key_path=CONFIG["ssh_key"],
+        )
+        if gpu_metrics:
+            save_gpu_metrics(gpu_metrics)
+        else:
+            logger.warning("No GPU metrics collected; nothing to save.")
 
         logger.info("Ingestion pipeline completed successfully")
 
