@@ -124,6 +124,7 @@ It showcases skills that map directly onto modern ML Platform, MLOps, and AI eng
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+```mermaid
 flowchart LR
     %% NODES
 
@@ -193,4 +194,4 @@ flowchart LR
     Repo --> CI
     CI --> Train
     CI --> InferSvc
-
+```
