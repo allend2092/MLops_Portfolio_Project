@@ -2,11 +2,12 @@
 
 import json
 import logging
-import os
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
+
+import pandas as pd  # NEW: for Parquet output
 
 logger = logging.getLogger(__name__)
 
@@ -174,13 +175,15 @@ def normalize_gpu_record(rec: Dict) -> Optional[Dict]:
 class PreprocessConfig:
     ingested_root: Path = Path("data/ingested")
     processed_root: Path = Path("data/processed")
-    output_filename: str = "combined_events.jsonl"
+    output_filename_jsonl: str = "combined_events.jsonl"
+    output_filename_parquet: str = "combined_events.parquet"
 
 
 def process_all(config: Optional[PreprocessConfig] = None) -> Path:
     """
     Read raw ingested JSONL logs (systemd, docker, gpu),
-    normalize them to a unified schema, and write a combined JSONL file.
+    normalize them to a unified schema, and write a combined JSONL file,
+    and also write a Parquet file for analytics/ML use.
 
     Returns:
         Path to the combined JSONL file.
@@ -194,49 +197,67 @@ def process_all(config: Optional[PreprocessConfig] = None) -> Path:
 
     output_dir = config.processed_root
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / config.output_filename
+    
+    jsonl_path = output_dir / config.output_filename_jsonl
+    parquet_path = output_dir / config.output_filename_parquet
 
-    logger.info(f"Starting preprocessing. Output -> {output_path}")
+    logger.info(f"Starting preprocessing. JSONL -> {jsonl_path}, Parquet -> {parquet_path}")
 
     total_written = 0
+    all_events: List[Dict] = []
 
-    with output_path.open("w", encoding="utf-8") as out_f:
+    # ---- Systemd logs ----
+    if systemd_dir.exists():
+        for path in sorted(systemd_dir.glob("*.jsonl")):
+            logger.info(f"Processing systemd file: {path}")
+            for rec in _read_jsonl(path):
+                norm = normalize_systemd_record(rec)
+                if norm is None:
+                    continue
+                all_events.append(norm)
+                total_written += 1
 
-        # ---- Systemd logs ----
-        if systemd_dir.exists():
-            for path in sorted(systemd_dir.glob("*.jsonl")):
-                logger.info(f"Processing systemd file: {path}")
-                for rec in _read_jsonl(path):
-                    norm = normalize_systemd_record(rec)
-                    if norm is None:
-                        continue
-                    out_f.write(json.dumps(norm) + "\n")
-                    total_written += 1
+    # ---- Docker logs ----
+    if docker_dir.exists():
+        for path in sorted(docker_dir.glob("*.jsonl")):
+            logger.info(f"Processing docker file: {path}")
+            for rec in _read_jsonl(path):
+                norm = normalize_docker_record(rec)
+                if norm is None:
+                    continue
+                all_events.append(norm)
+                total_written += 1
 
-        # ---- Docker logs ----
-        if docker_dir.exists():
-            for path in sorted(docker_dir.glob("*.jsonl")):
-                logger.info(f"Processing docker file: {path}")
-                for rec in _read_jsonl(path):
-                    norm = normalize_docker_record(rec)
-                    if norm is None:
-                        continue
-                    out_f.write(json.dumps(norm) + "\n")
-                    total_written += 1
+    # ---- GPU metrics ----
+    if gpu_dir.exists():
+        for path in sorted(gpu_dir.glob("*.jsonl")):
+            logger.info(f"Processing gpu file: {path}")
+            for rec in _read_jsonl(path):
+                norm = normalize_gpu_record(rec)
+                if norm is None:
+                    continue
+                all_events.append(norm)
+                total_written += 1
 
-        # ---- GPU metrics ----
-        if gpu_dir.exists():
-            for path in sorted(gpu_dir.glob("*.jsonl")):
-                logger.info(f"Processing gpu file: {path}")
-                for rec in _read_jsonl(path):
-                    norm = normalize_gpu_record(rec)
-                    if norm is None:
-                        continue
-                    out_f.write(json.dumps(norm) + "\n")
-                    total_written += 1
+    # ---- Write JSONL ----
+    with jsonl_path.open("w", encoding="utf-8") as out_f:
+        for ev in all_events:
+            out_f.write(json.dumps(ev) + "\n")
 
-    logger.info(f"Preprocessing completed. Wrote {total_written} events to {output_path}")
-    return output_path
+
+    logger.info(f"Wrote {total_written} events to JSONL at {jsonl_path}")
+
+    # ---- Write Parquet ----
+    if all_events:
+        df = pd.DataFrame(all_events)
+        df.to_parquet(parquet_path, index=False)
+        logger.info(f"Wrote {len(df)} events to Parquet at {parquet_path}")
+    else:
+        logger.warning("No events to write; skipping Parquet generation")
+
+    logger.info("Preprocessing completed.")
+    return jsonl_path
+
 
 
 def configure_logging() -> None:
