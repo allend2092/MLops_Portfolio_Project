@@ -48,9 +48,15 @@ def collect_systemd_logs(
             continue
         try:
             rec = json.loads(line)
+
+            # Enrich each record with metadata
+            rec.setdefault("host", host)
+            rec.setdefault("unit", unit)
+            rec["source"] = "systemd"
+
             logs.append(rec)
         except json.JSONDecodeError:
-            logger.warning("Skipping non-JSON line from journalctl output")
+            logger.warning("Skipping non-JSON line from journalctl output") 
 
     logger.info(f"Collected {len(logs)} log entries from unit '{unit}' on {host}")
     return logs

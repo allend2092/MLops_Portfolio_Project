@@ -63,14 +63,15 @@ def collect_gpu_metrics(
 
         try:
             gpu_record: Dict = {
-                "host": host,
-                "collected_at": collected_at,
-                "gpu_index": int(index_str),
-                "gpu_name": name,
-                "temperature_gpu_c": float(temp_str),
-                "utilization_gpu_pct": float(util_str),
-                "memory_used_mb": float(mem_used_str),
-                "memory_total_mb": float(mem_total_str),
+                "source": "gpu",
+		"host": host,
+		"collected_at": collected_at,
+		"gpu_index": int(index_str),
+		"gpu_name": name,
+		"temperature_gpu_c": float(temp_str),
+		"utilization_gpu_pct": float(util_str),
+		"memory_used_mb": float(mem_used_str),
+		"memory_total_mb": float(mem_total_str),
             }
             metrics.append(gpu_record)
         except ValueError as ve:

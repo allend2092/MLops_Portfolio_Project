@@ -127,11 +127,12 @@ def collect_docker_logs(
                 ts_str, msg = None, line
 
             rec: Dict = {
-                "host": host,
-                "container_id": cid,
-                "container_name": name,
-                "timestamp": ts_str,
-                "message": msg,
+                "source": "docker",
+		"host": host,
+		"container_id": cid,
+		"container_name": name,
+		"timestamp": ts_str,
+		"message": msg,
             }
             all_logs.append(rec)
 
