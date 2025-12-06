@@ -19,5 +19,6 @@ Thumbs.db
 *.pt
 *.bin
 
-# Kaggle data folder (optional: ignore if you don't want data in git)
+# Data & logs (real artifacts, not example samples)
 data/
+logs/
