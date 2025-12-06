@@ -1,4 +1,4 @@
-# MLOps Portfolio Project  
+# MLOps Portfolio Project
 ## Real-World Log Anomaly Detection Using a Multi-GPU Home Lab AI Server
 
 ![AI Server](pictures/AI_computer.jpg)
@@ -7,126 +7,134 @@
 
 ## Overview
 
-This project is an end-to-end **MLOps engineering demonstration** built around a realistic production-inspired environment:  
+This project is an end-to-end **MLOps engineering demonstration** built around a realistic production-inspired environment:
 my **multi-GPU home-lab AI server**.
 
 Instead of relying on toy datasets, this project collects **real operational logs** from a live machine running:
 
-- Local LLM inference (Ollama, Open-WebUI, HuggingFace GGUF models)  
-- Dockerized services  
-- GPU-accelerated workloads  
-- Linux system daemons  
-- High-power PSU + multi-fan cooling under varying thermal loads  
+- Local LLM inference (Ollama, Open-WebUI, HuggingFace GGUF models)
+- Dockerized services
+- GPU-accelerated workloads
+- Linux system daemons
+- High-power PSU + multi-fan cooling under varying thermal loads
 
 These logs feed a complete ML-driven **anomaly detection pipeline**, similar to what real-world Data/AI/Platform teams use to monitor production AI services.
 
 ---
 
-## 🖥️Hardware Platform — *The AI Box*
-
-This workstation generates realistic operational logs suitable for anomaly detection and MLOps workflows.
+## 🖥️ Hardware Platform — *The AI Box*
 
 | Component | Details |
 |----------|---------|
-| **CPU** | Intel Core i7-6950X (10 cores / 20 threads) |
+| **CPU** | Intel Core i7-6950X |
 | **Motherboard** | Gigabyte X99P-SLI-CF |
 | **Memory** | 32 GB DDR4 |
-| **GPUs** | NVIDIA RTX 3090 (24 GB VRAM) + NVIDIA RTX 3060 (12 GB VRAM) |
+| **GPUs** | NVIDIA RTX 3090 (24 GB) + RTX 3060 (12 GB) |
 | **Total VRAM** | 36 GB |
-| **Power Supply** | Cooler Master 1000W |
-| **Cooling** | Dual Thermaltake tower coolers + case fans |
-| **Workload** | Local LLM inference, Docker services, GPU-heavy operations |
+| **PSU** | 1000W |
+| **Cooling** | Dual tower coolers + case fans |
+| **Workload** | Local LLM inference and GPU-heavy operations |
 
 ---
 
 ## Project Goal
 
-Design and deploy a **production-style anomaly detection system** capable of identifying:
+Build a **production-style anomaly detection system** capable of identifying:
 
 - abnormal GPU behavior  
 - service failures  
 - thermal anomalies  
 - container restarts  
-- unusual system log sequences  
-
-The focus is on building a real MLOps pipeline — not just training a model.
+- unusual sequence patterns in logs  
 
 ---
 
-## 🏗️ Project Phases
+# ✅ Current Pipeline Implementation
 
-### **Phase 1 — Log Collection + Exploration**
-- Collect logs from systemd, Docker, GPU telemetry, and AI workloads  
-- Parse and structure messages  
-- Establish a baseline of normal behavior  
+This repository now implements:
 
-### **Phase 2 — Baseline ML Anomaly Detection**
-- Use Isolation Forest, One-Class SVM, or statistical baselines  
-- Detect deviations in log patterns  
-- Build a simple inference script  
-
-### **Phase 3 — Modular Training Pipeline**
-Introduce `/src` modules for:
-- ingestion  
-- preprocessing  
-- feature engineering  
-- model training  
-- batch/online inference  
-
-### **Phase 4 — Experiment Tracking & Model Registry**
-Add MLflow or Weights & Biases for:
-- experiment tracking  
-- parameter logging  
-- artifact storage  
-- model versioning  
-
-### **Phase 5 — Deployment**
-Deploy the model as:
-- a FastAPI inference service  
-- containerized via Docker  
-- optional scaling using Docker Compose or Kubernetes  
-
-### **Phase 6 — Monitoring & Drift Detection**
-Use EvidentlyAI or custom dashboards to monitor:
-- data drift  
-- anomaly rate changes  
-- model performance decay  
-
-### **Phase 7 — CI/CD for ML**
-Add GitHub Actions to automate:
-- testing  
-- linting  
-- container builds  
-- model retraining  
-- deployments  
+1. Remote ingestion of logs + GPU telemetry  
+2. Normalization and preprocessing into a unified schema  
+3. Production-style output artifacts: JSONL + Parquet  
 
 ---
 
-## Why This Project Matters
+## 1️⃣ Ingestion Pipeline (SSH → AI Box → Raw Logs)
 
-Most ML portfolios show **notebooks**.  
-Most DevOps portfolios show **infrastructure**.
+The ingestion runner is:
 
-This project demonstrates the **intersection — MLOps**:
+```bash
+python -m pipeline.run_ingestion
+```
 
-- real data  
-- real pipelines  
-- reproducible experiments  
-- deployment workflows  
-- monitoring and observability  
-- hardware + GPU awareness  
-- automation  
-- model lifecycle management  
+This command:  
+- SSH’s into the AI box (172.16.0.20) using Paramiko  
+- Runs:  
+```bash
+journalctl --output=json          # systemd logs
+docker ps + docker logs           # container logs
+nvidia-smi --query-gpu=... \
+  --format=csv,noheader,nounits   # GPU metrics
+```
+- Writes raw JSONL artifacts under:  
+```bash
+data/ingested/systemd/systemd_logs_*.jsonl
+data/ingested/docker/docker_logs_*.jsonl
+data/ingested/gpu/gpu_metrics_*.jsonl
+```
+Each record is tagged with:  
+- source = systemd | docker | gpu  
+- host  
+- plus additional metadata (units, container names, GPU fields)  
 
-It showcases skills that map directly onto modern ML Platform, MLOps, and AI engineering roles.
+
+##  Normalization & Preprocessing (JSONL → Unified Events → Parquet)
+
+Run:  
+```bash
+python -m src.preprocessing.parser
+```
+
+This performs:  
+
+- Timestamp normalization (microseconds → ISO-8601)  
+- Schema unification  
+- Deduplication-friendly structured format  
+  
+Produces:  
+- data/processed/combined_events.jsonl  
+- data/processed/combined_events.parquet  
+  
+Example Unified Event (structure)
+```bash
+{
+  "timestamp": "2025-12-06T17:20:30.123456+00:00",
+  "source": "docker",
+  "host": "AI-box",
+  "category": "log",
+  "subtype": "docker",
+  "container_name": "open-webui",
+  "message": "...",
+}
+```
+
+## Quick Data Exploration (from Parquet)
+
+Use pandas to verify everything. View it under the notebook directory.
 
 
+## 🏗️ Project Phases (Full Roadmap)
 
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Phase 1 — Log Collection + Exploration✔️ Done  
+Phase 2 — Baseline ML Anomaly Detection  
+Phase 3 — Training Pipeline  
+Phase 4 — Model Registry + Experiment Tracking  
+Phase 5 — Deployment (FastAPI + Docker)  
+Phase 6 — Monitoring & Drift Detection  
+Phase 7 — CI/CD (GitHub Actions)  
 
 ```mermaid
 flowchart LR
-    %% NODES
 
     subgraph Dev["Dev / MLOps Node (172.16.0.10)"]
         Jupyter["Jupyter / VS Code / CLI"]
@@ -140,27 +148,24 @@ flowchart LR
 
     subgraph AI["AI Box (172.16.0.20)"]
         Sysd["systemd Journal<br/>(journalctl)"]
-        DockerLogs["Docker Logs<br/>(docker logs, docker ps)"]
+        DockerLogs["Docker Logs<br/>(docker logs)"]
         GPUMetrics["GPU Telemetry<br/>(nvidia-smi)"]
-        LLMs["LLM Workloads & Open WebUI<br/>(Docker / containers)"]
+        LLMs["LLM Workloads<br/>(Docker / Open WebUI)"]
     end
 
     subgraph Data["Data & Artifacts on Dev Node"]
         Raw["Raw Logs<br/>data/ingested/**"]
-        Processed["Processed / Parsed Logs<br/>data/processed/**"]
+        Processed["Processed Logs<br/>data/processed/**"]
         Features["Training Features<br/>data/features/**"]
-        Models["Model Artifacts / Checkpoints<br/>models/**"]
+        Models["Model Artifacts<br/>models/**"]
     end
 
     subgraph Ops["Ops / Integration"]
         CI["GitHub Actions CI/CD"]
-        Registry["Model Registry / Artifact Store<br/>(local or cloud, future)"]
-        Monitor["Monitoring & Drift Detection<br/>(metrics, alerts, dashboards)"]
+        Registry["Model Registry"]
+        Monitor["Monitoring & Drift Detection"]
     end
 
-    %% RELATIONSHIPS
-
-    %% Dev workflow
     Jupyter --> Repo
     Repo --> Pipeline
     Repo --> Preproc
@@ -168,17 +173,14 @@ flowchart LR
     Repo --> Train
     Repo --> InferSvc
 
-    %% Ingestion over SSH
-    Pipeline -- "SSH (Paramiko)" --> Sysd
-    Pipeline -- "SSH (Paramiko)" --> DockerLogs
-    Pipeline -- "SSH (Paramiko)" --> GPUMetrics
+    Pipeline -- "SSH" --> Sysd
+    Pipeline -- "SSH" --> DockerLogs
+    Pipeline -- "SSH" --> GPUMetrics
 
-    %% Logs generated by workloads
     LLMs --> Sysd
     LLMs --> DockerLogs
     LLMs --> GPUMetrics
 
-    %% Data flow on Dev node
     Pipeline --> Raw
     Preproc --> Processed
     FeatEng --> Features
@@ -186,12 +188,12 @@ flowchart LR
     Models --> Registry
     Registry --> InferSvc
 
-    %% Monitoring / feedback
     InferSvc --> Monitor
     Monitor --> Train
 
-    %% CI/CD
     Repo --> CI
     CI --> Train
     CI --> InferSvc
+
 ```
+
