@@ -22,7 +22,7 @@ These logs feed a complete ML-driven **anomaly detection pipeline**, similar to 
 
 ---
 
-## 🖥️ Hardware Platform — *The AI Box*
+## ardware Platform — *The AI Box*
 
 | Component | Details |
 |----------|---------|
@@ -49,7 +49,7 @@ Build a **production-style anomaly detection system** capable of identifying:
 
 ---
 
-# ✅ Current Pipeline Implementation
+# Current Pipeline Implementation
 
 This repository now implements:
 
@@ -59,7 +59,7 @@ This repository now implements:
 
 ---
 
-## 1️⃣ Ingestion Pipeline (SSH → AI Box → Raw Logs)
+## Ingestion Pipeline (SSH → AI Box → Raw Logs)
 
 The ingestion runner is:
 
@@ -73,8 +73,7 @@ This command:
 ```bash
 journalctl --output=json          # systemd logs
 docker ps + docker logs           # container logs
-nvidia-smi --query-gpu=... \
-  --format=csv,noheader,nounits   # GPU metrics
+nvidia-smi --query-gpu=... --format=csv,noheader,nounits   # GPU metrics
 ```
 - Writes raw JSONL artifacts under:  
 ```bash
@@ -120,7 +119,8 @@ Example Unified Event (structure)
 
 ## Quick Data Exploration (from Parquet)
 
-Use pandas to verify everything. View it under the notebook directory.
+Use pandas to verify everything. View it under the notebook directory.  
+![Jupyter Notebook](pictures/jupyter_normalized_log_ingest.png)
 
 
 ## 🏗️ Project Phases (Full Roadmap)
