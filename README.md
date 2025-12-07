@@ -22,7 +22,7 @@ These logs feed a complete ML-driven **anomaly detection pipeline**, similar to 
 
 ---
 
-## ardware Platform — *The AI Box*
+## Hardware Platform — *The AI Box*
 
 | Component | Details |
 |----------|---------|
