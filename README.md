@@ -133,9 +133,11 @@ Phase 5 — Deployment (FastAPI + Docker)
 Phase 6 — Monitoring & Drift Detection  
 Phase 7 — CI/CD (GitHub Actions)  
 
+
 ```mermaid
 flowchart LR
 
+    %% ========= DEV / MLOps NODE =========
     subgraph Dev["Dev / MLOps Node (172.16.0.10)"]
         Jupyter["Jupyter / VS Code / CLI"]
         Repo["Git Repo<br/>MLops_Portfolio_Project"]
@@ -143,16 +145,19 @@ flowchart LR
         Preproc["Preprocessing & Validation<br/>(src/preprocessing)"]
         FeatEng["Feature Engineering<br/>(src/features)"]
         Train["Model Training & Evaluation<br/>(src/models)"]
-        InferSvc["Inference Service (FastAPI)<br/>(src/inference)"]
+        InferCode["Inference Service Code (FastAPI)<br/>(src/inference)"]
     end
 
+    %% ========= AI BOX =========
     subgraph AI["AI Box (172.16.0.20)"]
+        LLMs["LLM Workloads<br/>(Docker / Open WebUI)"]
         Sysd["systemd Journal<br/>(journalctl)"]
         DockerLogs["Docker Logs<br/>(docker logs)"]
         GPUMetrics["GPU Telemetry<br/>(nvidia-smi)"]
-        LLMs["LLM Workloads<br/>(Docker / Open WebUI)"]
+        InferSvc["Deployed Inference Service<br/>(FastAPI container)"]
     end
 
+    %% ========= DATA & ARTIFACTS (ON DEV) =========
     subgraph Data["Data & Artifacts on Dev Node"]
         Raw["Raw Logs<br/>data/ingested/**"]
         Processed["Processed Logs<br/>data/processed/**"]
@@ -160,40 +165,50 @@ flowchart LR
         Models["Model Artifacts<br/>models/**"]
     end
 
+    %% ========= OPS / INTEGRATION =========
     subgraph Ops["Ops / Integration"]
         CI["GitHub Actions CI/CD"]
-        Registry["Model Registry"]
+        Registry["Model Registry / Artifact Store"]
         Monitor["Monitoring & Drift Detection"]
     end
 
+    %% ---- Dev workflow ----
     Jupyter --> Repo
     Repo --> Pipeline
     Repo --> Preproc
     Repo --> FeatEng
     Repo --> Train
-    Repo --> InferSvc
+    Repo --> InferCode
 
+    %% ---- Ingestion over SSH (Dev -> AI box) ----
     Pipeline -- "SSH" --> Sysd
     Pipeline -- "SSH" --> DockerLogs
     Pipeline -- "SSH" --> GPUMetrics
 
+    %% ---- Workloads generating logs on AI box ----
     LLMs --> Sysd
     LLMs --> DockerLogs
     LLMs --> GPUMetrics
 
+    %% Inference service on AI box also produces logs + GPU usage
+    InferSvc --> Sysd
+    InferSvc --> DockerLogs
+    InferSvc --> GPUMetrics
+
+    %% ---- Data flow on Dev node ----
     Pipeline --> Raw
     Preproc --> Processed
     FeatEng --> Features
     Train --> Models
     Models --> Registry
-    Registry --> InferSvc
 
-    InferSvc --> Monitor
-    Monitor --> Train
-
+    %% ---- Inference deployment path ----
     Repo --> CI
     CI --> Train
     CI --> InferSvc
 
+    %% ---- Serving and monitoring loop ----
+    Registry --> InferSvc
+    InferSvc --> Monitor
+    Monitor --> Train
 ```
-
